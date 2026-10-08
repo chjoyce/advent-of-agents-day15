@@ -1,0 +1,26 @@
+steps:
+  - name: hashicorp/terraform:1.11
+    id: terraform-memory-isolation
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd terraform
+        terraform init -reconfigure \
+          -backend-config="bucket=${_TF_BUCKET}" \
+          -backend-config="prefix=memory-isolation-day15/state"
+        terraform apply -auto-approve \
+          -var="project_id=${PROJECT_ID}" \
+          -var="us_region=${_US_REGION}" \
+          -var="eu_region=${_EU_REGION}" \
+          -var="existing_us_engine_id=${_EXISTING_US_ENGINE_ID}"
+        terraform output -json > /workspace/deployment_outputs.json
+
+substitutions:
+  _US_REGION: us-central1
+  _EU_REGION: europe-west1
+  _EXISTING_US_ENGINE_ID: ""
+  _TF_BUCKET: ${PROJECT_ID}-terraform-state
+
+options:
+  logging: CLOUD_LOGGING_ONLY
