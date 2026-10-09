@@ -25,11 +25,27 @@ import json
 import os
 from pathlib import Path
 import sys
+import warnings
 
-import google.auth
-from google.auth import impersonated_credentials
-from google.genai import types as genai_types
-import vertexai
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# If invoked with system python3 where `vertexai` is not installed, automatically
+# re-exec using a local or home `.venv` if available.
+try:
+    import google.auth
+    from google.auth import impersonated_credentials
+    from google.genai import types as genai_types
+    import vertexai
+except ModuleNotFoundError:
+    for candidate_venv in (
+        Path(__file__).parent / ".venv" / "bin" / "python",
+        Path.home() / "chjoyce-capstone-project" / ".venv" / "bin" / "python",
+        Path.home() / "ambient-expense-agent" / ".venv" / "bin" / "python",
+    ):
+        if candidate_venv.exists() and str(candidate_venv) != sys.executable:
+            os.execv(str(candidate_venv), [str(candidate_venv), *sys.argv])
+    raise
 
 # ANSI formatting for clear on-camera terminal output
 BOLD = "\033[1m"
@@ -102,6 +118,8 @@ def make_impersonated_client(
 ) -> vertexai.Client:
     """Creates a Vertex AI Client authenticated via keyless Service Account impersonation."""
     source_credentials, _ = google.auth.default(scopes=TARGET_SCOPES)
+    if hasattr(source_credentials, "with_quota_project"):
+        source_credentials = source_credentials.with_quota_project(project_id)
     impersonated_creds = impersonated_credentials.Credentials(
         source_credentials=source_credentials,
         target_principal=target_sa_email,
@@ -183,6 +201,17 @@ def act_1_namespace_partitioning(cfg: dict[str, str]) -> None:
     )
 
 
+def _format_iam_error(exc: Exception) -> str:
+    """Extracts the concise 403 PERMISSION_DENIED message for clean terminal output."""
+    msg = str(exc)
+    if '"message":' in msg or "'message':" in msg:
+        import re  # pylint: disable=import-outside-toplevel
+        match = re.search(r"""['"]message['"]:\s*["']([^"']+)["']""", msg)
+        if match:
+            return f"403 PERMISSION_DENIED — {match.group(1)}"
+    return f"{type(exc).__name__}: {msg.splitlines()[0]}"
+
+
 def act_2_lob_rbac_boundary(cfg: dict[str, str]) -> None:
     banner(
         "ACT 2: Line-of-Business RBAC Boundary (Cloud IAM Conditions on `memoryScope`)",
@@ -214,8 +243,7 @@ def act_2_lob_rbac_boundary(cfg: dict[str, str]) -> None:
         list(wealth_client.agent_engines.memories.retrieve(name=us_bank, scope=retail_scope))
         print(f"   {RED}❌ Unexpected success! Check IAM bindings.{RESET}")
     except Exception as exc:  # pylint: disable=broad-except
-        print(f"   {GREEN}🚫 BLOCKED BY CLOUD IAM (Expected 403 PERMISSION_DENIED):{RESET}")
-        print(f"      {RED}{type(exc).__name__}: {exc}{RESET}")
+        print(f"   {GREEN}🚫 BLOCKED BY CLOUD IAM:{RESET} {RED}{_format_iam_error(exc)}{RESET}")
 
     print(
         f"\n{BOLD}3. Wealth Management Agent attempts to WRITE/POISON Alice's Retail Banking memory "
@@ -229,8 +257,7 @@ def act_2_lob_rbac_boundary(cfg: dict[str, str]) -> None:
         )
         print(f"   {RED}❌ Unexpected success! Check IAM bindings.{RESET}")
     except Exception as exc:  # pylint: disable=broad-except
-        print(f"   {GREEN}🚫 BLOCKED BY CLOUD IAM (Expected 403 PERMISSION_DENIED):{RESET}")
-        print(f"      {RED}{type(exc).__name__}: {exc}{RESET}")
+        print(f"   {GREEN}🚫 BLOCKED BY CLOUD IAM:{RESET} {RED}{_format_iam_error(exc)}{RESET}")
 
 
 def act_3_regional_gdpr_boundary(cfg: dict[str, str]) -> None:
@@ -277,8 +304,7 @@ def act_3_regional_gdpr_boundary(cfg: dict[str, str]) -> None:
         list(eu_client_as_us.agent_engines.memories.retrieve(name=eu_bank, scope=eva_scope))
         print(f"   {RED}❌ Unexpected success! Check regional IAM condition.{RESET}")
     except Exception as exc:  # pylint: disable=broad-except
-        print(f"   {GREEN}🚫 CROSS-BORDER READ BLOCKED BY CLOUD IAM (Expected 403 PERMISSION_DENIED):{RESET}")
-        print(f"      {RED}{type(exc).__name__}: {exc}{RESET}")
+        print(f"   {GREEN}🚫 CROSS-BORDER READ BLOCKED BY CLOUD IAM:{RESET} {RED}{_format_iam_error(exc)}{RESET}")
 
     print(
         f"\n{BOLD}3. EU Retail Agent (`{eu_retail_sa}`) attempts cross-border READ of Alice's US memory "
@@ -288,8 +314,7 @@ def act_3_regional_gdpr_boundary(cfg: dict[str, str]) -> None:
         list(us_client_as_eu.agent_engines.memories.retrieve(name=us_bank, scope=alice_scope))
         print(f"   {RED}❌ Unexpected success! Check regional IAM condition.{RESET}")
     except Exception as exc:  # pylint: disable=broad-except
-        print(f"   {GREEN}🚫 CROSS-BORDER READ BLOCKED BY CLOUD IAM (Expected 403 PERMISSION_DENIED):{RESET}")
-        print(f"      {RED}{type(exc).__name__}: {exc}{RESET}")
+        print(f"   {GREEN}🚫 CROSS-BORDER READ BLOCKED BY CLOUD IAM:{RESET} {RED}{_format_iam_error(exc)}{RESET}")
 
 
 def main() -> None:
