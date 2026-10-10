@@ -6,12 +6,18 @@
 #   ./deploy.sh [PROJECT_ID] [EXISTING_US_ENGINE_ID]
 #
 # Example:
-#   ./deploy.sh terraform-demo-agents
+#   ./deploy.sh my-gcp-project-id
 # ==============================================================================
 
 set -euo pipefail
 
-PROJECT_ID="${1:-${PROJECT_ID:-terraform-demo-agents}}"
+DEFAULT_GCLOUD_PROJECT="$(gcloud config get-value project 2>/dev/null || true)"
+PROJECT_ID="${1:-${PROJECT_ID:-${DEFAULT_GCLOUD_PROJECT}}}"
+if [[ -z "${PROJECT_ID}" || "${PROJECT_ID}" == "(unset)" ]]; then
+  echo "ERROR: No GCP project specified."
+  echo "Usage: ./deploy.sh <YOUR_GCP_PROJECT_ID>"
+  exit 1
+fi
 EXISTING_US_ENGINE_ID="${2:-${EXISTING_US_ENGINE_ID:-}}"
 US_REGION="${US_REGION:-us-central1}"
 EU_REGION="${EU_REGION:-europe-west1}"
@@ -60,7 +66,7 @@ gcloud services enable \
   --project="${PROJECT_ID}"
 
 # ------------------------------------------------------------------------------
-# 2. Auto-detect existing US Reasoning Engine in `terraform-demo-agents` (if any)
+# 2. Check for existing US Reasoning Engine in target project (if any)
 # ------------------------------------------------------------------------------
 if [[ -z "${EXISTING_US_ENGINE_ID}" ]]; then
   echo "-> [2/5] Checking for existing Reasoning Engine in ${US_REGION}..."
@@ -72,12 +78,10 @@ if [[ -z "${EXISTING_US_ENGINE_ID}" ]]; then
 import json, sys
 data = json.load(sys.stdin)
 engines = data.get('reasoningEngines', [])
-# Prefer 'terraform-demo-agent' or 'us-banking-memory-bank' if present
-for preferred in ('terraform-demo-agent', 'us-banking-memory-bank'):
-    for e in engines:
-        if e.get('displayName') == preferred:
-            print(e['name'].split('/')[-1])
-            sys.exit(0)
+for e in engines:
+    if e.get('displayName') == 'us-banking-memory-bank':
+        print(e['name'].split('/')[-1])
+        sys.exit(0)
 if engines:
     print(engines[0]['name'].split('/')[-1])
 " 2>/dev/null || true
@@ -111,7 +115,7 @@ fi
 echo "-> [4/5] Applying Terraform configuration..."
 cd "${REPO_ROOT}/terraform"
 
-terraform init -reconfigure \
+terraform init -reconfigure -upgrade \
   -backend-config="bucket=${TF_BUCKET}" \
   -backend-config="prefix=memory-isolation-day15/state"
 

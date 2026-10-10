@@ -1,6 +1,6 @@
 variable "project_id" {
   type        = string
-  description = "Google Cloud project ID (e.g. terraform-demo-agents)."
+  description = "Google Cloud project ID."
 }
 
 variable "us_region" {
@@ -17,6 +17,6 @@ variable "eu_region" {
 
 variable "existing_us_engine_id" {
   type        = string
-  description = "Optional existing Reasoning Engine ID in us-central1 (e.g. from terraform-demo-agent). Leave empty to provision a dedicated US Memory Bank."
+  description = "Optional existing Reasoning Engine ID in us-central1. Leave empty to provision a dedicated US Memory Bank."
   default     = ""
 }

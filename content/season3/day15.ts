@@ -80,7 +80,7 @@ resource "google_project_iam_member" "eu_retail_gdpr_memory_isolation" {
       language: "bash",
       code: `# 1. Provision US & EU Memory Banks and Conditional IAM RBAC boundaries:
 chmod +x deploy.sh
-./deploy.sh terraform-demo-agents
+./deploy.sh $GOOGLE_CLOUD_PROJECT
 
 # 2. Run the 3-Act live verification demo (Namespace + LOB RBAC + GDPR):
 python3 demo.py --act 1   # Act 1: Alice vs. Charlie user isolation

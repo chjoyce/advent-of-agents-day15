@@ -78,7 +78,7 @@ def load_config() -> dict[str, str]:
             for k, v in raw.items():
                 cfg[k] = v["value"] if isinstance(v, dict) and "value" in v else str(v)
 
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or cfg.get("project_id", "terraform-demo-agents")
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or cfg.get("project_id", "")
     us_region = os.environ.get("US_REGION") or cfg.get("us_region", "us-central1")
     eu_region = os.environ.get("EU_REGION") or cfg.get("eu_region", "europe-west1")
     us_memory_bank = os.environ.get("US_MEMORY_BANK_NAME") or cfg.get("us_memory_bank_name", "")
@@ -94,10 +94,10 @@ def load_config() -> dict[str, str]:
         "eu_retail_sa_email", f"eu-retail-agent-sa@{project_id}.iam.gserviceaccount.com"
     )
 
-    if not us_memory_bank or not eu_memory_bank:
+    if not project_id or not us_memory_bank or not eu_memory_bank:
         print(
-            f"{RED}ERROR: Missing US_MEMORY_BANK_NAME or EU_MEMORY_BANK_NAME.{RESET}\n"
-            f"Run `./deploy.sh {project_id}` first to provision the Memory Banks and generate `deployment_outputs.json`."
+            f"{RED}ERROR: Missing project_id, US_MEMORY_BANK_NAME, or EU_MEMORY_BANK_NAME.{RESET}\n"
+            "Run `./deploy.sh <YOUR_GCP_PROJECT_ID>` first to provision the Memory Banks and generate `deployment_outputs.json`."
         )
         sys.exit(1)
 

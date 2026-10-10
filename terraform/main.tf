@@ -52,8 +52,8 @@ data "google_project" "current" {
 # ==============================================================================
 # 2. Regional Agent Memory Banks (US: us-central1 | EU: europe-west1 for GDPR)
 # ==============================================================================
-# If `existing_us_engine_id` is passed (e.g. from the existing chatbot agent in
-# `terraform-demo-agents`), reuse it; otherwise provision a dedicated US Memory Bank.
+# If `existing_us_engine_id` is passed, reuse that existing Reasoning Engine in
+# us-central1; otherwise provision a dedicated US Memory Bank.
 resource "google_vertex_ai_reasoning_engine" "us_memory_bank" {
   count        = var.existing_us_engine_id == "" ? 1 : 0
   provider     = google-beta

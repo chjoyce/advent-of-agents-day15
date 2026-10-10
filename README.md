@@ -74,11 +74,11 @@ gcloud auth application-default login
 
 ### 2. Deploy the Regional Memory Banks & Conditional IAM Boundaries
 
-Run `./deploy.sh` targeting your project (defaults to `terraform-demo-agents`). If `terraform-demo-agent` already exists in `us-central1`, `deploy.sh` automatically reuses it for the US region and provisions the GDPR-compliant `europe-west1` Memory Bank alongside the 3 conditional IAM bindings:
+Run `./deploy.sh` targeting your Google Cloud project (or omit the argument to use your active `gcloud config get-value project`). `deploy.sh` provisions the US (`us-central1`) and GDPR-compliant EU (`europe-west1`) Memory Banks alongside the 3 conditional IAM bindings:
 
 ```bash
 chmod +x deploy.sh
-./deploy.sh terraform-demo-agents
+./deploy.sh $GOOGLE_CLOUD_PROJECT
 ```
 
 ### 3. Run the 3-Act Live Verification Demo

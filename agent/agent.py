@@ -4,7 +4,7 @@ from google.adk.agents.callback_context import CallbackContext
 from google.adk.tools import ToolContext
 import vertexai
 
-PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "terraform-demo-agents")
+PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
 
 # Regional Memory Bank (Reasoning Engine) resource names:
 # - US_MEMORY_BANK_NAME: projects/{PROJECT_NUMBER}/locations/us-central1/reasoningEngines/{US_ENGINE_ID}
