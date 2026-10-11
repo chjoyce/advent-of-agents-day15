@@ -54,8 +54,6 @@ flowchart LR
 │   ├── main.tf           # Provisions US & EU Memory Banks, 3 Regional/LOB SAs & IAM Conditions
 │   ├── variables.tf      # Configurable project_id, us_region, eu_region, existing_us_engine_id
 │   └── outputs.tf        # Exports Memory Bank resource names and Service Account emails
-├── content/season3/
-│   └── day15.ts          # Advent of Agents Season 3 Day 15 website content
 ├── deploy.sh             # Turnkey 1-command deployment script
 ├── demo.py               # Live 3-Act verification script (Namespace + LOB RBAC + GDPR RBAC)
 └── cloudbuild.yaml       # Cloud Build CI/CD pipeline
