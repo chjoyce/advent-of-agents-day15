@@ -91,7 +91,7 @@ python3 demo.py --act 3   # Act 3: US vs. EU cross-border GDPR 403 PERMISSION_DE
   links: [
     {
       label: "Day 15 Code Kata",
-      url: "https://github.com/chjoyce/advent-of-agents-s3-memory-isolation-day15",
+      url: "https://github.com/chjoyce/advent-of-agents-day15",
       description: "Memory Isolation & Regional Compliance (GDPR) demo with Terraform and ADK."
     },
     {
@@ -103,6 +103,11 @@ python3 demo.py --act 3   # Act 3: US vs. EU cross-border GDPR 403 PERMISSION_DE
       label: "Memory Bank IAM Conditions (`memoryScope`)",
       url: "https://docs.cloud.google.com/agent-builder/agent-engine/memory-bank/Quickstart-api",
       description: "Enforce fine-grained RBAC on Memory Bank scopes using Cloud IAM Conditions."
+    },
+    {
+      label: "Provision Agents with Terraform",
+      url: "https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/use-terraform",
+      description: "Deploy regional Agent Runtimes, Memory Banks, and IAM policies with Terraform."
     }
   ],
   description: `
@@ -115,6 +120,12 @@ When enterprise agents store long-term memories across sessions, a naive shared 
 - **1. Strict Runtime Namespace Partitioning (\`scope\` + ADK \`ToolContext\`)**: Every memory write and retrieval in Vertex AI Memory Bank requires an exact-match \`scope\` dictionary (up to 5 key-value pairs, e.g. \`{"lob": "retail_banking", "user_id": "alice@bank.com"}\`). By reading \`user_id\` and \`tenant_lob\` from ADK's server-populated \`ToolContext\` (which is automatically stripped from the LLM's \`FunctionDeclaration\` schema), a prompt-injected model cannot forge another user's scope.
 - **2. Line-of-Business RBAC via Cloud IAM Conditions**: Bind \`roles/aiplatform.memoryUser\` with the CEL condition \`api.getAttribute('aiplatform.googleapis.com/memoryScope', {})['lob'] == 'retail_banking'\` so a Wealth Management agent receives an immediate \`403 PERMISSION_DENIED\` from Cloud IAM if it attempts to read or poison Retail Banking memories.
 - **3. Regional Data Residency & GDPR Boundaries**: Provision regional Memory Banks (\`us-central1\` vs. \`europe-west1\`) and combine \`resource.name.startsWith('projects/.../locations/europe-west1/reasoningEngines/...')\` with \`memoryScope\` IAM conditions so European customer memories never cross regional borders.
+
+**Resources:**
+- [Day 15 Kata Demo Repository](https://github.com/chjoyce/advent-of-agents-day15): Run \`./deploy.sh\` and \`python3 demo.py\` for the 3-act live verification demo.
+- [Vertex AI Agent Memory Bank Overview](https://docs.cloud.google.com/agent-builder/agent-engine/memory-bank/overview)
+- [Memory Bank IAM Conditions (\`memoryScope\`)](https://docs.cloud.google.com/agent-builder/agent-engine/memory-bank/Quickstart-api)
+- [Provision Agents with Terraform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/use-terraform)
 `,
-  videoURL: null
+  videoURL: "https://www.youtube.com/embed/ZysvMoKHXRM?si=J233sJdcreFFQw7l"
 };
