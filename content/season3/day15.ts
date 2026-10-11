@@ -2,7 +2,7 @@ import { DayContent } from '../types';
 
 export const day15: DayContent = {
   day: 15,
-  title: "Memory Isolation & Regional Compliance (GDPR)",
+  title: "Memory Isolation: Namespace Scopes & Regional GDPR RBAC",
   summary: "Prevent persistent agent memory from leaking across users, lines of business, or regional borders using Vertex AI Memory Bank scope partitioning, ADK ToolContext, and Cloud IAM Conditions.",
   tags: ["Memory Bank", "IAM Conditions", "GDPR", "Governance"],
   icon: "🔐",
